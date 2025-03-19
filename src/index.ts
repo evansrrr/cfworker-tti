@@ -1,125 +1,130 @@
-// 前端页面 (包含安全增强)
-const html = `
+// 前端 HTML 页面模板
+const HTML_PAGE = `
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' your-worker.example.com">
+  <title>AI 图像生成</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    .container { text-align: center; }
+    input { width: 80%; padding: 12px; margin: 1rem 0; }
+    button { background: #0070f3; color: white; border: none; padding: 12px 24px; cursor: pointer; }
+    img { max-width: 100%; margin-top: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>自定义图像生成</h1>
+    <input type="text" id="promptInput" placeholder="输入图片描述 (例如：一只穿着宇航服的猫)">
+    <button onclick="generateImage()">生成图片</button>
+    <div id="result"></div>
+  </div>
+
   <script>
-    (async () => {
-      const promptText = prompt("请输入图片描述（20-500字符）：");
-      if (!promptText) return;
+    async function generateImage() {
+      const prompt = document.getElementById('promptInput').value;
+      const resultDiv = document.getElementById('result');
+      
+      if (!prompt) {
+        alert("请输入图片描述");
+        return;
+      }
 
       try {
-        // 添加请求校验
+        resultDiv.innerHTML = '<div class="loading">生成中...</div>';
+        
+        // 发送生成请求
         const response = await fetch('/', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: JSON.stringify({ prompt: promptText.slice(0, 500) }) // 长度限制
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
         });
 
-        // 处理错误状态
         if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || '生成失败');
+          throw new Error(await response.text());
         }
 
-        // 安全加载图片
+        // 显示生成的图片
         const blob = await response.blob();
         const img = document.createElement('img');
         img.src = URL.createObjectURL(blob);
-        img.onload = () => URL.revokeObjectURL(img.src); // 内存清理
-        document.body.appendChild(img);
+        img.onload = () => URL.revokeObjectURL(img.src); // 释放内存
+        
+        resultDiv.innerHTML = '';
+        resultDiv.appendChild(img);
 
       } catch (error) {
-        alert(\`错误：\${error.message}\`);
+        resultDiv.innerHTML = \`<div class="error">错误：\${error.message}</div>\`;
       }
-    })();
+    }
   </script>
 </body>
 </html>
 `;
 
-// Worker 安全增强代码
 export default {
   async fetch(request: Request, env: Env) {
-    // 配置 CORS 头
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://your-worker.example.com",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, X-Requested-With",
-      "Access-Control-Max-Age": "86400"
+    // 安全配置
+    const CORS_HEADERS = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type"
     };
 
-    // 处理预检请求
+    // 处理 OPTIONS 预检请求
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, { headers: CORS_HEADERS });
     }
 
-    // 主请求处理
-    try {
-      // 请求过滤
-      if (request.method === "POST") {
-        // 校验 Content-Type
-        const contentType = request.headers.get("Content-Type") || "";
-        if (!contentType.includes("application/json")) {
-          throw new Error("Invalid content type");
-        }
-
-        // 获取并验证输入
+    // 处理 POST 请求（图片生成）
+    if (request.method === "POST") {
+      try {
+        // 验证输入
         const { prompt } = await request.json();
-        if (!prompt || typeof prompt !== "string") {
-          throw new Error("Prompt required");
+        if (!prompt || typeof prompt !== 'string') {
+          throw new Error("无效的输入参数");
         }
 
-        // 输入清洗
+        // 输入清洗（防 XSS/长度限制）
         const cleanPrompt = prompt
           .slice(0, 500)
-          .replace(/[<>$]/g, ""); // 防止 XSS
+          .replace(/[<>$#]/g, "");
 
-        // 调用 AI 生成
-        const response = await env.AI.run(
+        // 调用 AI 模型
+        const image = await env.AI.run(
           "@cf/stabilityai/stable-diffusion-xl-base-1.0",
           { prompt: cleanPrompt }
         );
 
-        // 返回安全响应
-        return new Response(response, {
+        // 返回图片
+        return new Response(image, {
           headers: {
-            "content-type": "image/png",
-            ...corsHeaders,
-            "X-Content-Type-Options": "nosniff",
-            "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
+            "Content-Type": "image/png",
+            ...CORS_HEADERS,
+            "Cache-Control": "public, max-age=3600" // 缓存 1 小时
+          }
+        });
+
+      } catch (error) {
+        return new Response(JSON.stringify({
+          error: true,
+          message: error.message
+        }), {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+            ...CORS_HEADERS
           }
         });
       }
-
-      // 返回前端页面
-      return new Response(html, {
-        headers: {
-          "content-type": "text/html; charset=UTF-8",
-          ...corsHeaders,
-          "X-Frame-Options": "DENY"
-        }
-      });
-
-    } catch (error) {
-      // 安全错误处理
-      return new Response(JSON.stringify({
-        error: true,
-        message: error.message
-      }), {
-        status: 400,
-        headers: {
-          "content-type": "application/json",
-          ...corsHeaders
-        }
-      });
     }
+
+    // 返回前端页面（GET 请求）
+    return new Response(HTML_PAGE, {
+      headers: {
+        "Content-Type": "text/html; charset=UTF-8",
+        ...CORS_HEADERS
+      }
+    });
   }
 } satisfies ExportedHandler<Env>;
