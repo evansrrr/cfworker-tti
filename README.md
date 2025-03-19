@@ -1,3 +1,21 @@
+# Preface
+
+This repo contains a modified template from Cloudflare Worker AI.
+
+**What's new**💖:
+
+✨Seperated front-end and back-end,
+
+🎉New, clean UI/UX,
+
+🎏😍**Self-customize prompts**🙌,
+
+🎗️Input validation check,
+
+🏅CORS settings.
+
+**---------- Origin Content Below ----------**
+
 # Text To Image App
 
 ![Text To Image Template Preview](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/dddfe97e-e689-450b-d5a9-d49801da6a00/public)
