@@ -1,66 +1,279 @@
 // 前端 HTML 页面模板
 const HTML_PAGE = `
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-  <title>AI 图像生成</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 艺术工坊 - 图像生成</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-    .container { text-align: center; }
-    input { width: 80%; padding: 12px; margin: 1rem 0; }
-    button { background: #0070f3; color: white; border: none; padding: 12px 24px; cursor: pointer; }
-    img { max-width: 100%; margin-top: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      background: var(--background);
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .main-content {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .generator-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      margin-top: 2rem;
+    }
+
+    .input-group {
+      margin: 2rem 0;
+    }
+
+    .prompt-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    .prompt-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .generate-btn {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .generate-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .loading-spinner {
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+
+    .footer {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 2rem;
+      margin-top: auto;
+      text-align: center;
+      color: #6b7280;
+    }
+
+    .result-container {
+      margin-top: 2rem;
+      min-height: 400px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .generated-image {
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+    }
+
+    .generated-image:hover {
+      transform: scale(1.02);
+    }
+
+    .error-message {
+      color: #dc2626;
+      background: #fee2e2;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 640px) {
+      .main-content {
+        padding: 0 1rem;
+      }
+      .generator-card {
+        padding: 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>自定义图像生成</h1>
-    <input type="text" id="promptInput" placeholder="输入图片描述 (例如：一只穿着宇航服的猫)">
-    <button onclick="generateImage()">生成图片</button>
-    <div id="result"></div>
-  </div>
+  <header class="header">
+    <nav class="nav-container">
+      <a href="/" class="logo">AI Art Studio</a>
+      <div>
+        <a href="#" class="text-gray-600 hover:text-primary transition-colors">关于我们</a>
+        <a href="#" class="ml-4 text-gray-600 hover:text-primary transition-colors">使用指南</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="main-content">
+    <div class="generator-card">
+      <h1 class="text-3xl font-bold text-gray-800 text-center">AI 图像生成器</h1>
+      <p class="text-gray-600 mt-2 text-center">输入您的创意描述，生成独一无二的数字艺术作品</p>
+
+      <div class="input-group">
+        <input 
+          type="text" 
+          id="promptInput"
+          class="prompt-input"
+          placeholder="例：月光下的富士山，樱花飘落，动漫风格"
+        >
+      </div>
+
+      <div class="text-center">
+        <button onclick="generateImage()" class="generate-btn">
+          <span>立即生成</span>
+        </button>
+      </div>
+
+      <div id="result" class="result-container"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="max-w-4xl mx-auto">
+      <p class="mb-2">© 2024 AI Art Studio. 保留所有权利</p>
+      <div class="text-sm text-gray-500">
+        <a href="#" class="hover:text-gray-700 transition-colors">服务条款</a>
+        <span class="mx-2">|</span>
+        <a href="#" class="hover:text-gray-700 transition-colors">隐私政策</a>
+        <span class="mx-2">|</span>
+        <a href="#" class="hover:text-gray-700 transition-colors">联系我们</a>
+      </div>
+    </div>
+  </footer>
 
   <script>
     async function generateImage() {
-      const prompt = document.getElementById('promptInput').value;
+      const promptInput = document.getElementById('promptInput');
       const resultDiv = document.getElementById('result');
-      
-      if (!prompt) {
-        alert("请输入图片描述");
+      const btn = document.querySelector('.generate-btn');
+      const originalBtnText = btn.innerHTML;
+
+      // 校验输入
+      if (!promptInput.value.trim()) {
+        showError('请输入图片描述');
         return;
       }
 
       try {
-        resultDiv.innerHTML = '<div class="loading">生成中...</div>';
-        
-        // 发送生成请求
+        // 显示加载状态
+        btn.innerHTML = \`
+          <div class="loading-spinner"></div>
+          <span>生成中...</span>
+        \`;
+        btn.disabled = true;
+
+        // 发送请求
         const response = await fetch('/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
+          body: JSON.stringify({ prompt: promptInput.value })
         });
 
         if (!response.ok) {
-          throw new Error(await response.text());
+          const error = await response.text();
+          throw new Error(error || '生成失败，请重试');
         }
 
-        // 显示生成的图片
+        // 显示图片
         const blob = await response.blob();
-        const img = document.createElement('img');
+        const img = new Image();
         img.src = URL.createObjectURL(blob);
-        img.onload = () => URL.revokeObjectURL(img.src); // 释放内存
-        
+        img.className = 'generated-image';
+        img.onload = () => URL.revokeObjectURL(img.src);
+
         resultDiv.innerHTML = '';
         resultDiv.appendChild(img);
 
       } catch (error) {
-        resultDiv.innerHTML = \`<div class="error">错误：\${error.message}</div>\`;
+        showError(error.message);
+      } finally {
+        btn.innerHTML = originalBtnText;
+        btn.disabled = false;
       }
+    }
+
+    function showError(message) {
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = \`
+        <div class="error-message">
+          <strong>错误：</strong>\${message}
+        </div>
+      \`;
     }
   </script>
 </body>
 </html>
 `;
+
+// Worker 处理代码保持不变（与之前相同）
 
 export default {
   async fetch(request: Request, env: Env) {
