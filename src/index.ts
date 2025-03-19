@@ -198,7 +198,7 @@ const HTML_PAGE = `
 
   <footer class="footer">
     <div class="max-w-4xl mx-auto">
-      <p class="mb-2">Made with ❤️ by Raziore</p>
+      <p class="mb-2">Made with ❤️ by <a href="https://evansrrr.is-a.dev/" target="_blank">Raziore</a></p>
       <div class="text-sm text-gray-500">
         <!--<a href="#" class="hover:text-gray-700 transition-colors">服务条款</a>
         <span class="mx-2">|</span>
@@ -218,7 +218,7 @@ const HTML_PAGE = `
 
       // 校验输入
       if (!promptInput.value.trim()) {
-        showError('请输入图片描述');
+        showError('Invalid input');
         return;
       }
 
@@ -226,7 +226,7 @@ const HTML_PAGE = `
         // 显示加载状态
         btn.innerHTML = \`
           <div class="loading-spinner"></div>
-          <span>生成中...</span>
+          <span>Processing...</span>
         \`;
         btn.disabled = true;
 
@@ -239,7 +239,7 @@ const HTML_PAGE = `
 
         if (!response.ok) {
           const error = await response.text();
-          throw new Error(error || '生成失败，请重试');
+          throw new Error(error || 'An error accured.');
         }
 
         // 显示图片
@@ -264,7 +264,7 @@ const HTML_PAGE = `
       const resultDiv = document.getElementById('result');
       resultDiv.innerHTML = \`
         <div class="error-message">
-          <strong>错误：</strong>\${message}
+          <strong>Error: </strong>\${message}
         </div>
       \`;
     }
@@ -295,7 +295,7 @@ export default {
         // 验证输入
         const { prompt } = await request.json();
         if (!prompt || typeof prompt !== 'string') {
-          throw new Error("无效的输入参数");
+          throw new Error("Invalid input");
         }
 
         // 输入清洗（防 XSS/长度限制）
