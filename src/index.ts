@@ -5,7 +5,7 @@ const HTML_PAGE = `
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 艺术工坊 - 图像生成</title>
+  <title>Text to Image</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -164,31 +164,31 @@ const HTML_PAGE = `
 <body>
   <header class="header">
     <nav class="nav-container">
-      <a href="/" class="logo">AI Art Studio</a>
+      <a href="/" class="logo">Text to Image</a>
       <div>
-        <a href="#" class="text-gray-600 hover:text-primary transition-colors">关于我们</a>
-        <a href="#" class="ml-4 text-gray-600 hover:text-primary transition-colors">使用指南</a>
+        <a href="https://developers.cloudflare.com/workers-ai/" target="_blank" class="text-gray-600 hover:text-primary transition-colors">CloudFlare</a>
+        <a href="https://github.com/evansrrr/cfworker-tti" target="_blank" class="ml-4 text-gray-600 hover:text-primary transition-colors">Github</a>
       </div>
     </nav>
   </header>
 
   <main class="main-content">
     <div class="generator-card">
-      <h1 class="text-3xl font-bold text-gray-800 text-center">AI 图像生成器</h1>
-      <p class="text-gray-600 mt-2 text-center">输入您的创意描述，生成独一无二的数字艺术作品</p>
+      <h1 class="text-3xl font-bold text-gray-800 text-center">AI Image Generator</h1>
+      <p class="text-gray-600 mt-2 text-center">Type the prompts below and click Generate to see the result.</p>
 
       <div class="input-group">
         <input 
           type="text" 
           id="promptInput"
           class="prompt-input"
-          placeholder="例：月光下的富士山，樱花飘落，动漫风格"
+          placeholder="e.g. Fuji Mountain, moonlight, blooms, comic style"
         >
       </div>
 
       <div class="text-center">
         <button onclick="generateImage()" class="generate-btn">
-          <span>立即生成</span>
+          <span>Generate</span>
         </button>
       </div>
 
@@ -198,13 +198,13 @@ const HTML_PAGE = `
 
   <footer class="footer">
     <div class="max-w-4xl mx-auto">
-      <p class="mb-2">© 2024 AI Art Studio. 保留所有权利</p>
+      <p class="mb-2">Made with ❤️ by Raziore</p>
       <div class="text-sm text-gray-500">
-        <a href="#" class="hover:text-gray-700 transition-colors">服务条款</a>
+        <!--<a href="#" class="hover:text-gray-700 transition-colors">服务条款</a>
         <span class="mx-2">|</span>
         <a href="#" class="hover:text-gray-700 transition-colors">隐私政策</a>
         <span class="mx-2">|</span>
-        <a href="#" class="hover:text-gray-700 transition-colors">联系我们</a>
+        <a href="#" class="hover:text-gray-700 transition-colors">联系我们</a>-->
       </div>
     </div>
   </footer>
